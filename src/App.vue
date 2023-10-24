@@ -1,39 +1,63 @@
 <template>
   <div id="app">
     <img src="./logo.svg" />
-    <h1>Hello <a href='https://github.com/vuejs/vue' target='__blank'>Vue 2</a> and <a href='https://github.com/vueuse/vueuse' target='__blank'>VueUse</a>!</h1>
+    <UseDraggable :initialValue="{ x: 10, y: 10 }" v-slot="{ x, y }">
+      Drag me! I am at {{x}}, {{y}}
+    </UseDraggable>
 
-    <h3>Mouse: {{x}} x {{y}}</h3>
-    <h3>
-      Counter: {{count}}
-      <a @click='inc()' style='margin-right:10px'>+</a>
-      <a @click='dec()'>-</a>
-    </h3>
-
+    <UseDraggable
+      v-slot="{ x, y }"
+      p="x-4 y-2"
+      border="~ gray-400/30 rounded"
+      shadow="~ hover:lg"
+      class="fixed bg-$vp-c-bg select-none z-24"
+      :initial-value="{ x: innerWidth / 3.6, y: 240 }"
+      :prevent-default="true"
+      :handle="handle"
+    >
+      <div ref="handle" class="cursor-move">
+        👋 Drag here!
+      </div>
+      <div class="text-xs opacity-50">
+        Handle that triggers the drag event
+      </div>
+      <div class="text-sm opacity-50">
+        I am at {{ Math.round(x) }}, {{ Math.round(y) }}
+      </div>
+    </UseDraggable>
     <br/><br/>
-    <p><a href='https://github.com/vueuse/vueuse-vue2-example' target='__blank'>Source</a></p>
-    <p><a href='https://vueuse-vue3-example.netlify.app/' target='__blank'>Vue 3 Demo</a></p>
-    <p><a href='https://vueuse-vite-starter.netlify.app/' target='__blank'>Vite Starter</a></p>
   </div>
 </template>
 
-<script>
-import { useMouse, useCounter } from '@vueuse/core'
+<script lang="ts">
+import { ref, defineComponent } from '@vue/composition-api'
+import { useCounter, useDraggable } from '@vueuse/core'
+import { UseDraggable } from '@vueuse/components'
 
-export default {
+export default defineComponent({
+  components: {
+    UseDraggable,
+  },
   setup() {
-    const { x, y } = useMouse()
+    const el = ref<HTMLElement | null>(null)
     const { count, inc, dec } = useCounter()
+    const innerWidth = window.innerWidth
+    const { x, y, style } = useDraggable(el, {
+      initialValue: { x: innerWidth / 4.2, y: 80 },
+      preventDefault: true,
+    })
 
     return {
       x, 
       y,
+      style,
+      innerWidth,
       count,
       inc,
       dec,
     }
   }
-}
+})
 </script>
 
 <style scoped>
